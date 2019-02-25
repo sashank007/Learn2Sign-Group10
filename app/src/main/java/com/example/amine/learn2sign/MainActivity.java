@@ -2,7 +2,6 @@ package com.example.amine.learn2sign;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,13 +10,12 @@ import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,17 +37,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.internal.Utils;
+import cz.msebera.android.httpclient.ParseException;
 
-import static android.provider.MediaStore.EXTRA_DURATION_LIMIT;
-import static android.provider.MediaStore.EXTRA_MEDIA_TITLE;
 import static com.example.amine.learn2sign.LoginActivity.INTENT_EMAIL;
 import static com.example.amine.learn2sign.LoginActivity.INTENT_ID;
 import static com.example.amine.learn2sign.LoginActivity.INTENT_SERVER_ADDRESS;
@@ -62,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     static final int REQUEST_VIDEO_CAPTURE = 1;
+
 
     @BindView(R.id.rg_practice_learn)
     RadioGroup rg_practice_learn;
@@ -102,21 +97,24 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     long time_started = 0;
     long time_started_return = 0;
+    public static String asuId = "";
     Activity mainActivity;
-
-
+    String checkCountUri="http://10.211.17.171/check_video_count.php";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //bind xml to activity
         ButterKnife.bind(this);
+        System.out.println("this in onCreate ----->" + this);
         Stetho.initializeWithDefaults(this);
-
         rb_learn.setChecked(true);
+        rb_practice.setEnabled(false);
         bt_cancel.setVisibility(View.GONE);
         bt_send.setVisibility(View.GONE);
+        if(asuId!="") checkVideoCount();
+
+        //checking the video count
+//        checkVideoCount();
         rg_practice_learn.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
             @Override
@@ -128,7 +126,8 @@ public class MainActivity extends AppCompatActivity {
                     time_started = System.currentTimeMillis();
                 } else if ( checkedId==rb_practice.getId()) {
                     Toast.makeText(getApplicationContext(),"Practice",Toast.LENGTH_SHORT).show();
-                    vv_video_learn.setVisibility(View.GONE);
+                    Intent i = new Intent( MainActivity.this , PracticeActivity.class);
+                    startActivity(i);
                 }
             }
         });
@@ -191,14 +190,72 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences =  this.getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
         Intent intent = getIntent();
         if(intent.hasExtra(INTENT_EMAIL) && intent.hasExtra(INTENT_ID)) {
-            Toast.makeText(this,"User : " + intent.getStringExtra(INTENT_EMAIL),Toast.LENGTH_SHORT).show();
+            asuId=intent.getStringExtra(INTENT_ID);
+            System.out.println("changed asuId: " + asuId);
+            checkVideoCount();
+            Toast.makeText(this,"Current user id : " + intent.getStringExtra(INTENT_EMAIL),Toast.LENGTH_SHORT).show();
 
         } else {
-            Toast.makeText(this,"Already Logged In",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"Already Logged In" , Toast.LENGTH_SHORT ).show();
 
         }
     }
+//@TODO: Check if the count of the uploaded videos is 3 or more, then enable radio button practice
+    public  void setVideoCount(String cnt )
+    {
+        System.out.println("set video count----"  + cnt);
+        int count = 0;
+        if(isParsable(cnt))
+        {
+            count = Integer.parseInt(cnt);
+        }
+        System.out.println("setting the count in setVideoCount MainActivity " + count);
+        if (count>=3)
+        {
+            System.out.println("enable practice radio button");
+//            enableRadioButton();
+        }
+        //@TODO: remove this once done testing
+        rb_practice.setEnabled(true);
 
+    }
+    public void enableRadioButton(){
+
+        this.rb_practice.setEnabled(true);
+    }
+
+
+    public void checkVideoCount()
+    {
+        Intent intent = getIntent();
+        System.out.println("current asu id---" +  asuId);
+        System.out.println("inside check video count");
+        rb_practice.setEnabled(true);
+        System.out.println("asuID:" +asuId);
+        if(asuId!="") {
+            try {
+                System.out.println("inside try block");
+                //@TODO:change id
+                String currentCount = new PostData(checkCountUri).execute(asuId).get();
+                setVideoCount(currentCount.trim());
+            } catch (Exception e) {
+                System.out.println("error thrown:" + e);
+                return;
+            }
+        }
+
+    }
+    public static boolean isParsable(String input){
+        boolean parsable = true;
+        try{
+            Integer.parseInt(input);
+        }catch(ParseException e){
+            parsable = false;
+        }
+        return parsable;
+    }
+
+//@TODO: Once practice radio button is pressed, move to next activity
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
@@ -278,7 +335,6 @@ public class MainActivity extends AppCompatActivity {
     }
     @OnClick(R.id.bt_record)
     public void record_video() {
-
 
 
          if( ContextCompat.checkSelfPermission(this,
@@ -405,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
             bt_record.setVisibility(View.VISIBLE);
             sp_words.setEnabled(true);
             rb_learn.setEnabled(true);
-            //rb_practice.setEnabled(true);
+//            rb_practice.setEnabled(false);
             sp_ip_address.setEnabled(true);
 
 
@@ -421,7 +477,7 @@ public class MainActivity extends AppCompatActivity {
                 bt_cancel.setVisibility(View.VISIBLE);
                 sp_words.setEnabled(false);
                 rb_learn.setEnabled(false);
-                //rb_practice.setEnabled(false);
+//                rb_practice.setEnabled(false);
                 vv_record.setVideoURI(Uri.parse(returnedURI));
                 int try_number = sharedPreferences.getInt("record_"+sp_words.getSelectedItem().toString(),0);
                 try_number++;
@@ -581,6 +637,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+
         }
 
         @Override

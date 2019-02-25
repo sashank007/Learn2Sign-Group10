@@ -7,16 +7,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
 
@@ -58,10 +55,6 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         Stetho.initializeWithDefaults(this);
 
-
-
-
-
         time_to_login = System.currentTimeMillis();
         sharedPreferences = this.getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
         if(sharedPreferences.contains(INTENT_ID) && sharedPreferences.contains(INTENT_EMAIL)) {
@@ -82,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
 
             // Permission is not granted
             // Should we show an explanation?
-
+            Toast.makeText(this,"Without access to the camera, we cannot let you sign in" , Toast.LENGTH_LONG).show();
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.CAMERA)) {
                 // Show an explanation to the user *asynchronously* -- don't block
