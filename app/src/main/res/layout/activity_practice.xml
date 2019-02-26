@@ -76,10 +76,20 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/bt_practicerecord"
+                android:id="@+id/bt_practiceRecord"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Record" />
+            <Button
+                android:id="@+id/bt_practiceAccept"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Accept" />
+            <Button
+                android:id="@+id/bt_practiceRerecord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Re-record" />
 
         </LinearLayout>
 
