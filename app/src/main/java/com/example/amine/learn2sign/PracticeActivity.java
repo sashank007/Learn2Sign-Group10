@@ -41,8 +41,14 @@ public class PracticeActivity extends AppCompatActivity {
     @BindView(R.id.rb_practice2)
     RadioButton rb_practice;
 
-    @BindView(R.id.bt_practicerecord)
+    @BindView(R.id.bt_practiceRecord)
     Button bt_record;
+
+    @BindView(R.id.bt_practiceAccept)
+    Button bt_accept;
+
+     @BindView(R.id.bt_practiceRerecord)
+    Button bt_rerecord;
 
     @BindView(R.id.tv_randomword)
     TextView randomWord;
@@ -87,7 +93,7 @@ public class PracticeActivity extends AppCompatActivity {
             }
         });
     }
-    @OnClick(R.id.bt_practicerecord)
+    @OnClick(R.id.bt_practiceRecord)
     public void record_video() {
 
 
@@ -174,6 +180,102 @@ public class PracticeActivity extends AppCompatActivity {
             }*/
         }
     }
+
+    @OnClick(R.id.bt_practiceAccept)
+    public void sendToServer() {
+        Toast.makeText(this,"Send to Server",Toast.LENGTH_SHORT).show();
+        Intent t = new Intent(this,UploadActivity.class);
+        startActivityForResult(t,2000);
+    }
+
+   @OnClick(R.id.bt_practiceRerecord)
+    public void rerecord_video() {
+
+
+        if( ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED ) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CAMERA)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CAMERA},
+                        101);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+
+
+        if ( ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED ) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        100);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+
+        } else {
+            // Permission has already been granted
+            File f = new File(Environment.getExternalStorageDirectory(), "Learn2Sign");
+
+            if (!f.exists()) {
+                f.mkdirs();
+            }
+
+            time_started = System.currentTimeMillis() - time_started;
+
+            Intent t = new Intent(this,VideoActivity.class);
+            t.putExtra(INTENT_WORD,chosenWord);
+            t.putExtra(INTENT_TIME_WATCHED, time_started);
+            startActivityForResult(t,9999);
+
+
+
+
+
+ /*           File m = new File(Environment.getExternalStorageDirectory().getPath() + "/Learn2Sign");
+            if(!m.exists()) {
+                if(m.mkdir()) {
+                    Toast.makeText(this,"Directory Created",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+            takeVideoIntent.putExtra(EXTRA_DURATION_LIMIT, 10);
+
+            if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
+            }*/
+        }
+    }
+
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
@@ -200,7 +302,7 @@ public class PracticeActivity extends AppCompatActivity {
 //            rb_learn.setChecked(true);
 //            bt_cancel.setVisibility(View.GONE);
 //            bt_send.setVisibility(View.GONE);
-//            bt_record.setVisibility(View.VISIBLE);
+           
 //            sp_words.setEnabled(true);
 //            rb_learn.setEnabled(true);
 ////            rb_practice.setEnabled(false);
@@ -211,6 +313,9 @@ public class PracticeActivity extends AppCompatActivity {
         if(requestCode==9999 && resultCode == 8888) {
             System.out.println("request code 9999 and result code 8888");
             if(intent.hasExtra(INTENT_URI) && intent.hasExtra(INTENT_TIME_WATCHED_VIDEO)) {
+                 bt_record.setVisibility(View.GONE);
+                 bt_rerecord.setVisibility(View.VISIBLE);
+                bt_accept.setVisibility(View.VISIBLE);
                 System.out.println("inside has intent uri" + intent.getStringExtra(INTENT_URI));
                 returnedURI = intent.getStringExtra(INTENT_URI);
                 videoPractice.setVisibility(View.VISIBLE);

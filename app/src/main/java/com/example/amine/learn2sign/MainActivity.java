@@ -210,11 +210,14 @@ public class MainActivity extends AppCompatActivity {
             count = Integer.parseInt(cnt);
         }
         System.out.println("setting the count in setVideoCount MainActivity " + count);
-        if (count>=3)
-        {
-            System.out.println("enable practice radio button");
-//            enableRadioButton();
-        }
+
+        //this.rb_practice.setEnabled(true); // comment once tested
+       if (count>=3)
+       {
+           System.out.println("enable practice radio button");
+           enableRadioButton();
+       }
+
         //@TODO: remove this once done testing
         rb_practice.setEnabled(true);
 
