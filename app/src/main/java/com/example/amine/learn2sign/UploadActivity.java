@@ -1,15 +1,11 @@
 package com.example.amine.learn2sign;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,23 +20,16 @@ import android.widget.Toast;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.ResponseHandlerInterface;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.msebera.android.httpclient.Header;
-import cz.msebera.android.httpclient.HttpResponse;
 
 import static com.example.amine.learn2sign.LoginActivity.INTENT_ID;
+import static com.example.amine.learn2sign.LoginActivity.INTENT_PRACTICE;
 import static com.example.amine.learn2sign.LoginActivity.INTENT_SERVER_ADDRESS;
 
 public class UploadActivity extends AppCompatActivity {
@@ -55,6 +44,7 @@ public class UploadActivity extends AppCompatActivity {
     UploadActivity uploadActivity;
     SharedPreferences sharedPreferences;
     static int upload_number = 0;
+    String uploadUrl="/upload_video.php";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +102,15 @@ public class UploadActivity extends AppCompatActivity {
                         // send request
                         AsyncHttpClient client = new AsyncHttpClient();
                     final int finalI = i;
-                    client.post("http://"+server_ip +"/upload_video.php", params, new AsyncHttpResponseHandler() {
+                    Intent intent = getIntent();
+
+                    //practice video check
+                    if(intent.hasExtra(INTENT_PRACTICE)) {
+                        System.out.println("upload video performance");
+                       uploadUrl="/upload_video_performance.php";
+                    }
+
+                    client.post("http://"+server_ip +uploadUrl, params, new AsyncHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, byte[] bytes) {
                                 // handle success response

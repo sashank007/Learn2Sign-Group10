@@ -1,20 +1,10 @@
 package com.example.amine.learn2sign;
-import java.io.File;
-import java.io.IOException;
-import java.security.Policy;
-import java.security.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Timer;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
-import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -28,7 +18,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.facebook.stetho.common.LogUtil;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import static com.example.amine.learn2sign.LoginActivity.INTENT_ID;
 import static com.example.amine.learn2sign.LoginActivity.INTENT_TIME_WATCHED;
@@ -101,7 +95,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             @Override
             // toggle video recording
             public void onClick(final View v) {
-                timer = new CountDownTimer(5000, 1000) {
+                timer = new CountDownTimer(3000, 1000) {
                     public void onTick(long millisUntilFinished) {
                         int a = (int) (millisUntilFinished / 1000);
                         tv_timer.setText(a + " ");

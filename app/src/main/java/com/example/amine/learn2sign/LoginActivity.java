@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     public static String INTENT_TIME_WATCHED_VIDEO = "INTENT_TIME_WATCHED_VIDEO";
     public static String INTENT_URI = "INTENT_URI";
     public static String INTENT_SERVER_ADDRESS = "INTENT_SERVER_ADDRESS";
-
+    public static String INTENT_PRACTICE="INTENT_PRACTICE";
     @BindView(R.id.et_email)
     EditText et_email;
 

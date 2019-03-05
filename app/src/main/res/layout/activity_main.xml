@@ -85,7 +85,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="30dp"
-            android:text="Record" />
+            android:background="@color/colorPrimaryDark"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:text="Record"
+            android:textColor="@android:color/white" />
 
 
         <LinearLayout
@@ -100,13 +104,22 @@
                 android:id="@+id/bt_send"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Proceed" />
+                android:layout_margin="5dp"
+                android:background="@color/colorPrimaryDark"
+                android:text="Proceed"
+                android:textColor="@android:color/white" />
 
             <Button
                 android:id="@+id/bt_cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cancel" />
+                android:layout_margin="5dp"
+                android:background="@color/colorPrimaryDark"
+                android:clickable="true"
+
+                android:cursorVisible="false"
+                android:text="Cancel"
+                android:textColor="@android:color/white" />
         </LinearLayout>
 
     </LinearLayout>

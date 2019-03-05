@@ -1,7 +1,9 @@
 package com.example.amine.learn2sign;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,17 +17,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.example.amine.learn2sign.LoginActivity.INTENT_PRACTICE;
 import static com.example.amine.learn2sign.LoginActivity.INTENT_TIME_WATCHED;
 import static com.example.amine.learn2sign.LoginActivity.INTENT_TIME_WATCHED_VIDEO;
 import static com.example.amine.learn2sign.LoginActivity.INTENT_URI;
@@ -56,13 +61,18 @@ public class PracticeActivity extends AppCompatActivity {
     @BindView(R.id.vv_video_practice)
     VideoView videoPractice;
 
+    @BindView(R.id.ratingBar)
+    RatingBar ratingBar;
+
     String returnedURI = "";
     String wordsArray[];
     String chosenWord="";
     private static int boundSize=24;
     int randomInt=0;
     MainActivity mainActivity = new MainActivity();
-    long time_started = 0;
+    long time_started_return = 0;
+    long time_started=0;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,7 +88,10 @@ public class PracticeActivity extends AppCompatActivity {
         chosenWord = wordsArray[randomInt];
         randomWord.setText(chosenWord);
         time_started = System.currentTimeMillis();
-
+        sharedPreferences =  this.getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefEditor = sharedPreferences.edit();
+        prefEditor.putString("Clicked", "Practice");
+        prefEditor.commit();
         rg_practice_learn.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -159,6 +172,7 @@ public class PracticeActivity extends AppCompatActivity {
             Intent t = new Intent(this,VideoActivity.class);
             t.putExtra(INTENT_WORD,chosenWord);
             t.putExtra(INTENT_TIME_WATCHED, time_started);
+
             startActivityForResult(t,9999);
 
 
@@ -185,6 +199,7 @@ public class PracticeActivity extends AppCompatActivity {
     public void sendToServer() {
         Toast.makeText(this,"Send to Server",Toast.LENGTH_SHORT).show();
         Intent t = new Intent(this,UploadActivity.class);
+        t.putExtra(INTENT_PRACTICE,1);
         startActivityForResult(t,2000);
     }
 
@@ -313,7 +328,10 @@ public class PracticeActivity extends AppCompatActivity {
         if(requestCode==9999 && resultCode == 8888) {
             System.out.println("request code 9999 and result code 8888");
             if(intent.hasExtra(INTENT_URI) && intent.hasExtra(INTENT_TIME_WATCHED_VIDEO)) {
-                 bt_record.setVisibility(View.GONE);
+                time_started_return = intent.getLongExtra(INTENT_TIME_WATCHED_VIDEO,0);
+                ratingBar.setVisibility(View.VISIBLE);
+
+                bt_record.setVisibility(View.GONE);
                  bt_rerecord.setVisibility(View.VISIBLE);
                 bt_accept.setVisibility(View.VISIBLE);
                 System.out.println("inside has intent uri" + intent.getStringExtra(INTENT_URI));
@@ -321,6 +339,17 @@ public class PracticeActivity extends AppCompatActivity {
                 videoPractice.setVisibility(View.VISIBLE);
                 videoPractice.setVideoURI(Uri.parse(returnedURI));
                 videoPractice.start();
+                //logging activities
+                String toAdd  = randomWord.getText()+"_"+time_started_return;
+                int ratingNum = ratingBar.getNumStars();
+                HashSet<String> set1 = (HashSet<String>) sharedPreferences.getStringSet("PRACTICE",new HashSet<String>());
+                HashSet<String> set2 = (HashSet<String>) sharedPreferences.getStringSet("PRACTICE_RATING",new HashSet<String>());
+                set1.add(toAdd + "_"+Integer.toString(ratingNum));
+                set2.add(Integer.toString(ratingNum));
+                System.out.println("set2:" + set2);
+                sharedPreferences.edit().putStringSet("PRACTICE",set1).apply();
+                sharedPreferences.edit().putStringSet("PRACTICE_RATING" , set2).apply();
+
 //                returnedURI = intent.getStringExtra(INTENT_URI);
 //                time_started_return = intent.getLongExtra(INTENT_TIME_WATCHED_VIDEO,0);
 //

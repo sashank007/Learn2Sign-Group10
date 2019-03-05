@@ -112,7 +112,10 @@ public class MainActivity extends AppCompatActivity {
         bt_cancel.setVisibility(View.GONE);
         bt_send.setVisibility(View.GONE);
         if(asuId!="") checkVideoCount();
-
+        sharedPreferences =  this.getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefEditor = sharedPreferences.edit();
+        prefEditor.putString("Clicked", "Learn");
+        prefEditor.commit();
         //checking the video count
 //        checkVideoCount();
         rg_practice_learn.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
@@ -473,7 +476,6 @@ public class MainActivity extends AppCompatActivity {
             if(intent.hasExtra(INTENT_URI) && intent.hasExtra(INTENT_TIME_WATCHED_VIDEO)) {
                 returnedURI = intent.getStringExtra(INTENT_URI);
                 time_started_return = intent.getLongExtra(INTENT_TIME_WATCHED_VIDEO,0);
-
                 vv_record.setVisibility(View.VISIBLE);
                 bt_record.setVisibility(View.GONE);
                 bt_send.setVisibility(View.VISIBLE);
@@ -486,10 +488,10 @@ public class MainActivity extends AppCompatActivity {
                 try_number++;
                 String toAdd  = sp_words.getSelectedItem().toString()+"_"+try_number+"_"+time_started_return + "";
                 HashSet<String> set = (HashSet<String>) sharedPreferences.getStringSet("RECORDED",new HashSet<String>());
+                System.out.println("set when recorded:" + set);
                 set.add(toAdd);
                 sharedPreferences.edit().putStringSet("RECORDED",set).apply();
                 sharedPreferences.edit().putInt("record_"+sp_words.getSelectedItem().toString(), try_number).apply();
-
                 vv_video_learn.start();
             }
 
