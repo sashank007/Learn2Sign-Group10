@@ -199,8 +199,11 @@ public class UploadActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                if(statusCode==200)
+                if(statusCode==200) {
                     Toast.makeText(UploadActivity.this, "Done", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(UploadActivity.this,MainActivity.class);
+                    startActivity(i);
+                }
                 else
                     Toast.makeText(UploadActivity.this, "Log File could not be uploaded", Toast.LENGTH_SHORT).show();
             }

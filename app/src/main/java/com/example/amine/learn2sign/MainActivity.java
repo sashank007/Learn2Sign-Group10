@@ -195,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
         if(intent.hasExtra(INTENT_EMAIL) && intent.hasExtra(INTENT_ID)) {
             asuId=intent.getStringExtra(INTENT_ID);
             System.out.println("changed asuId: " + asuId);
+            //check the video count
             checkVideoCount();
             Toast.makeText(this,"Current user id : " + intent.getStringExtra(INTENT_EMAIL),Toast.LENGTH_SHORT).show();
 
@@ -203,34 +204,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-//@TODO: Check if the count of the uploaded videos is 3 or more, then enable radio button practice
-    public  void setVideoCount(String cnt )
-    {
-        System.out.println("set video count----"  + cnt);
-        int count = 0;
-        if(isParsable(cnt))
-        {
-            count = Integer.parseInt(cnt);
-        }
-        System.out.println("setting the count in setVideoCount MainActivity " + count);
-
-        //this.rb_practice.setEnabled(true); // comment once tested
-       if (count>=3)
-       {
-           System.out.println("enable practice radio button");
-           enableRadioButton();
-       }
-
-        //@TODO: remove this once done testing
-        rb_practice.setEnabled(true);
-
-    }
-    public void enableRadioButton(){
-
-        this.rb_practice.setEnabled(true);
-    }
-
-
+    // get current Count from PostData api
     public void checkVideoCount()
     {
         Intent intent = getIntent();
@@ -241,7 +215,6 @@ public class MainActivity extends AppCompatActivity {
         if(asuId!="") {
             try {
                 System.out.println("inside try block");
-                //@TODO:change id
                 String currentCount = new PostData(checkCountUri).execute(asuId).get();
                 setVideoCount(currentCount.trim());
             } catch (Exception e) {
@@ -251,6 +224,33 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+//Check if video count is more than 75, if so enable practice radio button
+    public void setVideoCount(String cnt )
+    {
+        System.out.println("set video count----"  + cnt);
+        int count = 0;
+        if(isParsable(cnt))
+        {
+            count = Integer.parseInt(cnt);
+        }
+        System.out.println("setting the count in setVideoCount MainActivity " + count);
+
+       if (count>=75)
+       {
+           System.out.println("enable practice radio button");
+           enableRadioButton();
+       }
+       else
+           Toast.makeText(this,"Login or Upload more than 75 videos to enable practice mode"  , Toast.LENGTH_SHORT).show();
+
+    }
+    public void enableRadioButton(){
+
+        this.rb_practice.setEnabled(true);
+    }
+
+
+
     public static boolean isParsable(String input){
         boolean parsable = true;
         try{
@@ -261,7 +261,6 @@ public class MainActivity extends AppCompatActivity {
         return parsable;
     }
 
-//@TODO: Once practice radio button is pressed, move to next activity
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
@@ -281,7 +280,6 @@ public class MainActivity extends AppCompatActivity {
     public void play_video(String text) {
         old_text = text;
         if(text.equals("Alaska")) {
-
              path = "android.resource://" + getPackageName() + "/" + R.raw.alaska;
         } else if(text.equals("Arizona")) {
             path = "android.resource://" + getPackageName() + "/" + R.raw.arizona;

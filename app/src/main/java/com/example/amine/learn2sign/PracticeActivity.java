@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -52,7 +53,7 @@ public class PracticeActivity extends AppCompatActivity {
     @BindView(R.id.bt_practiceAccept)
     Button bt_accept;
 
-     @BindView(R.id.bt_practiceRerecord)
+    @BindView(R.id.bt_practiceRerecord)
     Button bt_rerecord;
 
     @BindView(R.id.tv_randomword)
@@ -60,38 +61,208 @@ public class PracticeActivity extends AppCompatActivity {
 
     @BindView(R.id.vv_video_practice)
     VideoView videoPractice;
+    @BindView(R.id.vv_video_original)
+    VideoView vv_video_original;
 
     @BindView(R.id.ratingBar)
     RatingBar ratingBar;
-
+    String old_text = "";
+    String path;
     String returnedURI = "";
     String wordsArray[];
-    String chosenWord="";
-    private static int boundSize=24;
-    int randomInt=0;
-    MainActivity mainActivity = new MainActivity();
+    String chosenWord = "";
+    String rating = "";
+    private static int boundSize = 24;
     long time_started_return = 0;
-    long time_started=0;
+    long time_started = 0;
     SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_practice);
+        //initialize variables
         ButterKnife.bind(this);
-
-        //generate random word
-        Random rand = new Random();
-        randomInt=  rand.nextInt(boundSize);
         rb_practice.setChecked(true);
         wordsArray = getResources().getStringArray(R.array.spinner_words);
-        chosenWord = wordsArray[randomInt];
-        randomWord.setText(chosenWord);
         time_started = System.currentTimeMillis();
-        sharedPreferences =  this.getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+
+        //updating shared preferences
+        sharedPreferences = this.getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
         SharedPreferences.Editor prefEditor = sharedPreferences.edit();
         prefEditor.putString("Clicked", "Practice");
         prefEditor.commit();
+        //enable radio clicking
+        radioClick();
+        //generate random word
+        getRandomWord();
+    }
+
+    @OnClick(R.id.bt_practiceRecord)
+    public void record_video() {
+
+      recordVideo();
+    }
+
+    @OnClick(R.id.bt_practiceAccept)
+    public void sendToServer() {
+        rating = String.valueOf(ratingBar.getRating());
+        createSharedPrefs();
+        Toast.makeText(this, "Send to Server", Toast.LENGTH_SHORT).show();
+        Intent t = new Intent(this, UploadActivity.class);
+        t.putExtra(INTENT_PRACTICE, 1);
+        startActivityForResult(t, 2000);
+    }
+
+    @OnClick(R.id.bt_practiceRerecord)
+    public void rerecord_video() {
+
+        recordVideo();
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+        finish();
+        super.onBackPressed();
+    }
+
+    public void playOriginalVideo(String text) {
+        old_text = text;
+        if (text.equals("Alaska")) {
+
+            path = "android.resource://" + getPackageName() + "/" + R.raw.alaska;
+        } else if (text.equals("Arizona")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.arizona;
+        } else if (text.equals("California")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.california;
+        } else if (text.equals("Colorado"))  {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.colorado;
+        } else if (text.equals("Florida")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.florida;
+        } else if (text.equals("Georgia")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.georgia;
+        } else if (text.equals("Hawaii")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.hawaii;
+        } else if (text.equals("Illinois")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.illinois;
+        } else if (text.equals("Indiana")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.indiana;
+        } else if (text.equals("Kansas")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.kansas;
+        } else if (text.equals("Louisiana")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.louisiana;
+        } else if (text.equals("Massachusetts")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.massachusetts;
+        } else if (text.equals("Michigan")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.michigan;
+        } else if (text.equals("Minnesota")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.minnesota;
+        } else if (text.equals("Nevada")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.nevada;
+        } else if (text.equals("NewJersey")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.new_jersey;
+        } else if (text.equals("NewMexico")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.new_mexico;
+        } else if (text.equals("NewYork")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.new_york;
+        } else if (text.equals("Ohio")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.ohio;
+        } else if (text.equals("Pennsylvania")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.pennsylvania;
+        } else if (text.equals("SouthCarolina")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.south_carolina;
+        } else if (text.equals("Texas")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.texas;
+        } else if (text.equals("Utah")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.utah;
+        } else if (text.equals("Washington")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.washington;
+        } else if (text.equals("Wisconsin")) {
+            path = "android.resource://" + getPackageName() + "/" + R.raw.wisconsin;
+        }
+        if (!path.isEmpty()) {
+            Uri uri = Uri.parse(path);
+            vv_video_original.setVisibility(View.VISIBLE);
+            vv_video_original.setVideoURI(uri);
+            vv_video_original.start();
+        }
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+        Log.e("OnActivityresult", requestCode + " " + resultCode);
+        if (requestCode == 2000) {
+            System.out.println("success");
+
+        }
+        if (requestCode == 9999 && resultCode == 8888) {
+            System.out.println("request code 9999 and result code 8888");
+            if (intent.hasExtra(INTENT_URI) && intent.hasExtra(INTENT_TIME_WATCHED_VIDEO)) {
+                time_started_return = intent.getLongExtra(INTENT_TIME_WATCHED_VIDEO, 0);
+                ratingBar.setVisibility(View.VISIBLE);
+                bt_record.setVisibility(View.GONE);
+                bt_rerecord.setVisibility(View.VISIBLE);
+                bt_accept.setVisibility(View.VISIBLE);
+                returnedURI = intent.getStringExtra(INTENT_URI);
+                videoPractice.setVisibility(View.VISIBLE);
+                videoPractice.setVideoURI(Uri.parse(returnedURI));
+                videoPractice.start();
+
+                //logging activities
+
+                playOriginalVideo(randomWord.getText().toString());
+                loopVideos();
+
+            }
+
+        }
+        if (requestCode == 9999 && resultCode == 7777) {
+            if (intent != null) {
+                //create folder
+                if (intent.hasExtra(INTENT_URI) && intent.hasExtra(INTENT_TIME_WATCHED_VIDEO)) {
+                    returnedURI = intent.getStringExtra(INTENT_URI);
+                    time_started_return = intent.getLongExtra(INTENT_TIME_WATCHED_VIDEO, 0);
+                    File f = new File(returnedURI);
+                    f.delete();
+                    time_started = System.currentTimeMillis();
+                    //vv_video_learn.start();
+                }
+            }
+
+        }
+
+    }
+
+    private void getRandomWord() {
+        Random rand = new Random();
+        int random = rand.nextInt(boundSize);
+        chosenWord = wordsArray[random];
+        randomWord.setText(chosenWord);
+    }
+
+    private void loopVideos() {
+
+        MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                if (mediaPlayer != null) {
+                    mediaPlayer.start();
+
+                }
+
+            }
+        };
+        vv_video_original.setOnCompletionListener(onCompletionListener);
+        vv_video_original.setOnCompletionListener(onCompletionListener);
+        videoPractice.setOnCompletionListener(onCompletionListener);
+        videoPractice.setOnCompletionListener(onCompletionListener);
+    }
+
+    private void radioClick()
+    {
         rg_practice_learn.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -106,57 +277,33 @@ public class PracticeActivity extends AppCompatActivity {
             }
         });
     }
-    @OnClick(R.id.bt_practiceRecord)
-    public void record_video() {
 
-
-        if( ContextCompat.checkSelfPermission(this,
+    private void recordVideo()
+    {
+        if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED ) {
-
-            // Permission is not granted
-            // Should we show an explanation?
+                != PackageManager.PERMISSION_GRANTED) {
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.CAMERA)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
             } else {
-                // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.CAMERA},
                         101);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
             }
         }
 
-
-        if ( ContextCompat.checkSelfPermission(this,
+        if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED ) {
-
-            // Permission is not granted
-            // Should we show an explanation?
-
+                != PackageManager.PERMISSION_GRANTED) {
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
             } else {
-                // No explanation needed; request the permission
+
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         100);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
             }
 
         } else {
@@ -166,269 +313,27 @@ public class PracticeActivity extends AppCompatActivity {
             if (!f.exists()) {
                 f.mkdirs();
             }
-
             time_started = System.currentTimeMillis() - time_started;
-
-            Intent t = new Intent(this,VideoActivity.class);
-            t.putExtra(INTENT_WORD,chosenWord);
+            Intent t = new Intent(this, VideoActivity.class);
+            t.putExtra(INTENT_WORD, chosenWord);
             t.putExtra(INTENT_TIME_WATCHED, time_started);
-
-            startActivityForResult(t,9999);
-
+            startActivityForResult(t, 9999);
 
 
-
-
- /*           File m = new File(Environment.getExternalStorageDirectory().getPath() + "/Learn2Sign");
-            if(!m.exists()) {
-                if(m.mkdir()) {
-                    Toast.makeText(this,"Directory Created",Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-            takeVideoIntent.putExtra(EXTRA_DURATION_LIMIT, 10);
-
-            if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
-            }*/
         }
     }
 
-    @OnClick(R.id.bt_practiceAccept)
-    public void sendToServer() {
-        Toast.makeText(this,"Send to Server",Toast.LENGTH_SHORT).show();
-        Intent t = new Intent(this,UploadActivity.class);
-        t.putExtra(INTENT_PRACTICE,1);
-        startActivityForResult(t,2000);
+    private void createSharedPrefs()
+    {
+        String toAdd = randomWord.getText().toString() + "_" + time_started_return;
+
+        System.out.println("rating : -------------------" + rating);
+        HashSet<String> set1 = (HashSet<String>) sharedPreferences.getStringSet("PRACTICE", new HashSet<String>());
+        HashSet<String> set2 = (HashSet<String>) sharedPreferences.getStringSet("PRACTICE_RATING", new HashSet<String>());
+        set1.add(toAdd + "_" + (rating));
+        set2.add(rating);
+        System.out.println("set2:" + set2);
+        sharedPreferences.edit().putStringSet("PRACTICE", set1).apply();
+        sharedPreferences.edit().putStringSet("PRACTICE_RATING", set2).apply();
     }
-
-   @OnClick(R.id.bt_practiceRerecord)
-    public void rerecord_video() {
-
-
-        if( ContextCompat.checkSelfPermission(this,
-                Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED ) {
-
-            // Permission is not granted
-            // Should we show an explanation?
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.CAMERA)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.CAMERA},
-                        101);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }
-
-
-        if ( ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED ) {
-
-            // Permission is not granted
-            // Should we show an explanation?
-
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        100);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-
-        } else {
-            // Permission has already been granted
-            File f = new File(Environment.getExternalStorageDirectory(), "Learn2Sign");
-
-            if (!f.exists()) {
-                f.mkdirs();
-            }
-
-            time_started = System.currentTimeMillis() - time_started;
-
-            Intent t = new Intent(this,VideoActivity.class);
-            t.putExtra(INTENT_WORD,chosenWord);
-            t.putExtra(INTENT_TIME_WATCHED, time_started);
-            startActivityForResult(t,9999);
-
-
-
-
-
- /*           File m = new File(Environment.getExternalStorageDirectory().getPath() + "/Learn2Sign");
-            if(!m.exists()) {
-                if(m.mkdir()) {
-                    Toast.makeText(this,"Directory Created",Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-            takeVideoIntent.putExtra(EXTRA_DURATION_LIMIT, 10);
-
-            if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
-            }*/
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true);
-        finish();
-        super.onBackPressed();
-    }
-//
-//    @Override
-//    protected void onResume() {
-//
-//        vv_video_learn.start();
-//        time_started = System.currentTimeMillis();
-//        super.onResume();
-//
-//    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
-        Log.e("OnActivityresult",requestCode+" "+resultCode);
-        if(requestCode==2000 ) {
-            //from video activity
-//            vv_record.setVisibility(View.GONE);
-//            rb_learn.setChecked(true);
-//            bt_cancel.setVisibility(View.GONE);
-//            bt_send.setVisibility(View.GONE);
-           
-//            sp_words.setEnabled(true);
-//            rb_learn.setEnabled(true);
-////            rb_practice.setEnabled(false);
-//            sp_ip_address.setEnabled(true);
-        System.out.println("successssss--");
-
-        }
-        if(requestCode==9999 && resultCode == 8888) {
-            System.out.println("request code 9999 and result code 8888");
-            if(intent.hasExtra(INTENT_URI) && intent.hasExtra(INTENT_TIME_WATCHED_VIDEO)) {
-                time_started_return = intent.getLongExtra(INTENT_TIME_WATCHED_VIDEO,0);
-                ratingBar.setVisibility(View.VISIBLE);
-
-                bt_record.setVisibility(View.GONE);
-                 bt_rerecord.setVisibility(View.VISIBLE);
-                bt_accept.setVisibility(View.VISIBLE);
-                System.out.println("inside has intent uri" + intent.getStringExtra(INTENT_URI));
-                returnedURI = intent.getStringExtra(INTENT_URI);
-                videoPractice.setVisibility(View.VISIBLE);
-                videoPractice.setVideoURI(Uri.parse(returnedURI));
-                videoPractice.start();
-                //logging activities
-                String toAdd  = randomWord.getText()+"_"+time_started_return;
-                int ratingNum = ratingBar.getNumStars();
-                HashSet<String> set1 = (HashSet<String>) sharedPreferences.getStringSet("PRACTICE",new HashSet<String>());
-                HashSet<String> set2 = (HashSet<String>) sharedPreferences.getStringSet("PRACTICE_RATING",new HashSet<String>());
-                set1.add(toAdd + "_"+Integer.toString(ratingNum));
-                set2.add(Integer.toString(ratingNum));
-                System.out.println("set2:" + set2);
-                sharedPreferences.edit().putStringSet("PRACTICE",set1).apply();
-                sharedPreferences.edit().putStringSet("PRACTICE_RATING" , set2).apply();
-
-//                returnedURI = intent.getStringExtra(INTENT_URI);
-//                time_started_return = intent.getLongExtra(INTENT_TIME_WATCHED_VIDEO,0);
-//
-//                vv_record.setVisibility(View.VISIBLE);
-//                bt_record.setVisibility(View.GONE);
-//                bt_send.setVisibility(View.VISIBLE);
-//                bt_cancel.setVisibility(View.VISIBLE);
-//                sp_words.setEnabled(false);
-//                rb_learn.setEnabled(false);
-////                rb_practice.setEnabled(false);
-//                vv_record.setVideoURI(Uri.parse(returnedURI));
-//                int try_number = sharedPreferences.getInt("record_"+sp_words.getSelectedItem().toString(),0);
-//                try_number++;
-//                String toAdd  = sp_words.getSelectedItem().toString()+"_"+try_number+"_"+time_started_return + "";
-//                HashSet<String> set = (HashSet<String>) sharedPreferences.getStringSet("RECORDED",new HashSet<String>());
-//                set.add(toAdd);
-//                sharedPreferences.edit().putStringSet("RECORDED",set).apply();
-//                sharedPreferences.edit().putInt("record_"+sp_words.getSelectedItem().toString(), try_number).apply();
-//
-//                vv_video_learn.start();
-            }
-
-        }
-
-        if(requestCode==9999 && resultCode==7777)
-        {
-            System.out.println("requestcode 9999 and resultCode 7777");
-            if(intent!=null) {
-                //create folder
-                if(intent.hasExtra(INTENT_URI) && intent.hasExtra(INTENT_TIME_WATCHED_VIDEO)) {
-//                    returnedURI = intent.getStringExtra(INTENT_URI);
-//                    time_started_return = intent.getLongExtra(INTENT_TIME_WATCHED_VIDEO,0);
-//                    File f = new File(returnedURI);
-//                    f.delete();
-//                    //  int try_number = sharedPreferences.getInt("record_"+sp_words.getSelectedItem().toString(),0);
-//                    // try_number++;
-//                    //String toAdd  = sp_words.getSelectedItem().toString()+"_"+try_number+"_"+time_started_return + "_cancelled";
-//                    //HashSet<String> set = (HashSet<String>) sharedPreferences.getStringSet("RECORDED",new HashSet<String>());
-//                    // set.add(toAdd);
-//                    //  sharedPreferences.edit().putStringSet("RECORDED",set).apply();
-//                    //   sharedPreferences.edit().putInt("record_"+sp_words.getSelectedItem().toString(), try_number).apply();
-//
-//
-//
-//
-//                    time_started = System.currentTimeMillis();
-//                    vv_video_learn.start();
-                }
-            }
-
-        }
-
-        /*if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
-            final Uri videoUri = intent.getData();
-
-
-            vv_record.setVisibility(View.VISIBLE);
-            vv_record.setVideoURI(videoUri);
-            vv_record.start();
-            play_video(sp_words.getSelectedItem().toString());
-            bt_record.setVisibility(View.GONE);
-            int i=0;
-            File n = new File(Environment.getExternalStorageDirectory().getPath() + "/Learn2Sign/"
-                    + sharedPreferences.getString(INTENT_ID,"0000")+"_"+sp_words.getSelectedItem().toString()+"_0" + ".mp4");
-            while(n.exists()) {
-                i++;
-                n = new File(Environment.getExternalStorageDirectory().getPath() + "/Learn2Sign/"
-                        + sharedPreferences.getString(INTENT_ID,"0000")+"_"+sp_words.getSelectedItem().toString()+"_"+i + ".mp4");
-            }
-            SaveFile saveFile = new SaveFile();
-            saveFile.execute(n.getPath(),videoUri.toString());
-
-            bt_send.setVisibility(View.VISIBLE);
-            bt_cancel.setVisibility(View.VISIBLE);
-
-            sp_words.setEnabled(false);
-            rb_learn.setEnabled(false);
-            rb_practice.setEnabled(false);
-        }*/
-    }
-
 }
