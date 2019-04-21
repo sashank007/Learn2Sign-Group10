@@ -22,6 +22,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.util.HashSet;
@@ -38,14 +39,17 @@ import static com.example.amine.learn2sign.LoginActivity.INTENT_URI;
 import static com.example.amine.learn2sign.LoginActivity.INTENT_WORD;
 
 public class PracticeActivity extends AppCompatActivity {
-    @BindView(R.id.rg_practice_learn2)
+    @BindView(R.id.rg_practice_learn)
     RadioGroup rg_practice_learn;
 
-    @BindView(R.id.rb_learn2)
+    @BindView(R.id.rb_learn)
     RadioButton rb_learn;
 
-    @BindView(R.id.rb_practice2)
+    @BindView(R.id.rb_practice)
     RadioButton rb_practice;
+
+    @BindView(R.id.rb_predict)
+    RadioButton rb_predict;
 
     @BindView(R.id.bt_practiceRecord)
     Button bt_record;
@@ -273,6 +277,12 @@ public class PracticeActivity extends AppCompatActivity {
                 } else if (checkedId == rb_practice.getId()) {
                     Toast.makeText(getApplicationContext(), "Practice", Toast.LENGTH_SHORT).show();
 
+                }
+                else if(checkedId == rb_predict.getId()){
+                   // Toast.makeText(getApplicationContext(),"Practice",Toast.LENGTH_SHORT.show());
+                    Toast.makeText(getApplicationContext(), "Predict", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(PracticeActivity.this, PredictActivity.class);
+                    startActivity(i);
                 }
             }
         });

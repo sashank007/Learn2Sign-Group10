@@ -67,6 +67,10 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.rb_practice)
     RadioButton rb_practice;
 
+    @BindView(R.id.rb_predict)
+    RadioButton rb_predict;
+
+
     @BindView(R.id.sp_words)
     Spinner sp_words;
 
@@ -109,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         Stetho.initializeWithDefaults(this);
         rb_learn.setChecked(true);
         rb_practice.setEnabled(false);
+        rb_predict.setEnabled(true);
         bt_cancel.setVisibility(View.GONE);
         bt_send.setVisibility(View.GONE);
         if(asuId!="") checkVideoCount();
@@ -131,6 +136,12 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"Practice",Toast.LENGTH_SHORT).show();
                     Intent i = new Intent( MainActivity.this , PracticeActivity.class);
                     startActivity(i);
+                }
+                else if(checkedId == rb_predict.getId()){
+                    Toast.makeText(getApplicationContext(),"Predict",Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent( MainActivity.this , PredictActivity.class);
+                    startActivity(i);
+
                 }
             }
         });

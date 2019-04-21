@@ -10,9 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
         <RadioGroup
             android:id="@+id/rg_practice_learn"
-            android:layout_width="wrap_content"
+            android:layout_width="348dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
@@ -34,6 +35,17 @@
 
                 android:layout_marginLeft="30dp"
                 android:text="Practice"
+                android:textSize="20sp" />
+
+            <RadioButton
+                android:id="@+id/rb_predict"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+
+                android:layout_marginLeft="30dp"
+                android:layout_weight="1"
+                android:text="Predict"
                 android:textSize="20sp" />
 
 
