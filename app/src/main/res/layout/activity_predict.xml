@@ -44,6 +44,39 @@
 
     </RadioGroup>
 
+    <Button
+        android:id="@+id/bt_select_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="30dp"
+        android:background="@color/colorPrimaryDark"
+        android:clickable="true"
+        android:cursorVisible="false"
+        android:text="Select csv"
+        android:textColor="@android:color/white" />
 
+    <Button
+        android:id="@+id/bt_predict"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="30dp"
+        android:background="@color/colorPrimaryDark"
+        android:clickable="true"
+        android:cursorVisible="false"
+        android:text="Predict"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/tv_answer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="5dp"
+        android:gravity="center"
+        android:text=" "
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textColor="#000000" />
 
 </LinearLayout>
