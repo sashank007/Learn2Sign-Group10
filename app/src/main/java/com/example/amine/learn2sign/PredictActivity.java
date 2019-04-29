@@ -39,6 +39,12 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 
 
 import org.apache.commons.io.IOUtils;
+import  org.apache.http.entity.mime.MultipartEntity;
+import  org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.HttpMultipartMode;
+
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.core.io.ClassPathResource;
@@ -52,6 +58,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -77,7 +93,7 @@ import cz.msebera.android.httpclient.NameValuePair;
 import cz.msebera.android.httpclient.client.ClientProtocolException;
 import cz.msebera.android.httpclient.client.HttpClient;
 import cz.msebera.android.httpclient.client.entity.UrlEncodedFormEntity;
-import cz.msebera.android.httpclient.client.methods.HttpPost;
+
 import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
 import cz.msebera.android.httpclient.message.BasicNameValuePair;
 import cz.msebera.android.httpclient.util.EntityUtils;
@@ -189,7 +205,9 @@ public class PredictActivity extends AppCompatActivity {
             }
 
             Resource resource = new FileSystemResource(signFile);
-            String prediction = getPrediction(resource);
+            String prediction = predictAlready(resource);
+            //String prediction = getPrediction(resource);
+            //String prediction = sendFileToServer(signFile);
             //String prediction = "predicted word";
             //store file and upload
             Toast.makeText(getApplicationContext(),"prediction - "+prediction,Toast.LENGTH_SHORT).show();
@@ -216,38 +234,100 @@ public class PredictActivity extends AppCompatActivity {
 
         }
     }
-
-//    protected String sendFileToServer(Resource file){
-//        MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
-//        File file;
-//        multipartEntity.addBinaryBody("someName", file, ContentType.create("image/jpeg"), file.getName());
-////Json string attaching
-//        String json;
-//        multipartEntity.addPart("someName", new StringBody(json, ContentType.TEXT_PLAIN));
+//
+//    protected String sendFileToServer(File file){
+//
+//
+//        HttpClient httpclient = new DefaultHttpClient();
+//        HttpPost httppost = new HttpPost("http://3.14.82.136:5000/svm/runalgo");
+//
+//        MultipartEntity reqEntity = new MultipartEntity();
+//        //reqEntity.addPart("key", file);
+//        reqEntity.addPart("user_csv", new FileBody(file));
+//
+//
+//        httppost.setEntity(reqEntity);
+//        httppost.setEntity(new UrlEncodedFormEntity(reqEntity, ));
+//
+//       // HttpResponse response = httpclient.execute(httppost);
+//       HttpResponse response = httpclient.execute(httppost);
+//        this.answer = response.getEntity().toString();
+//
+//        return this.answer;
+//
 //    }
-    protected String doInBackgroundPredict(Resource File) {
+//    protected String doInBackgroundPredict(Resource File) {
+//
+//        HttpClient httpclient = new DefaultHttpClient();
+//        HttpPost httppost = new HttpPost("http://3.14.82.136:5000/svm/runalgo");
+//
+//        try {
+//            MultipartEntity reqEntity = new MultipartEntity();
+//           // String id = params[0];
+//            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+//            nameValuePairs.add(new BasicNameValuePair("user_csv", File));
+//            httppost.setHeader("key","user_csv");
+//            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+//            HttpResponse response = httpclient.execute(httppost);
+//            this.answer = EntityUtils.toString(response.getEntity());
+//
+//        } catch (ClientProtocolException e) {
+//            // TODO Auto-generated catch block
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//        }
+//        return this.answer;
+//    }
 
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost("http://3.14.82.136:5000/svm/runalgo");
-
+    String predictAlready(Resource file){
+        Log.d("radhika","INSIDE PREDICT ALREADY----------------------------");
         try {
-            MultipartEntity reqEntity = new MultipartEntity();
-           // String id = params[0];
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-            nameValuePairs.add(new BasicNameValuePair("user_csv", File));
-            httppost.setHeader("key","user_csv");
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            HttpResponse response = httpclient.execute(httppost);
-            this.answer = EntityUtils.toString(response.getEntity());
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
+            MultiValueMap<String, Object> body
+                    = new LinkedMultiValueMap<>();
+            Log.d("radhika","radhika1 - adding file to request:"+file.getFilename() );
+
+            body.add("user_csv", file);
+            HttpEntity<MultiValueMap<String, Object>> requestEntity
+                    = new HttpEntity<>(body, headers);
+            Log.d("radhika","radhika2 - file added to requestentity" );
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate = setTimeout(restTemplate, 3000);
+            Log.d("radhika","radhika3 -sending request" );
+            ResponseEntity<String> response;
+            response = restTemplate
+                    .postForEntity("http://3.19.14.50:5000/svm/runalgo", requestEntity, String.class);
+            Log.d("radhika","radhika4 - got response" );
+            HttpStatus statusCode = response.getStatusCode();
+            if(statusCode!=HttpStatus.OK)
+                return "Network Error or Could not predict";
+            else{
+                Log.d("radhika","status 400" );
+            }
+
+            Log.d("radhika","lalalala"+response.getBody());
+            return response.getBody();
         }
-        return this.answer;
+
+        catch (Exception e){
+            Log.d("radhika","threw exception");
+            Log.d("radhika",e.getMessage());
+            return  e.getMessage();
+        }
     }
 
+    private RestTemplate setTimeout(RestTemplate restTemplate, int timeout) {
+        Log.d("radhika","inside timeout");
+
+        restTemplate.setRequestFactory(new SimpleClientHttpRequestFactory());
+        SimpleClientHttpRequestFactory rf = (SimpleClientHttpRequestFactory) restTemplate
+                .getRequestFactory();
+        rf.setReadTimeout(timeout);
+        rf.setConnectTimeout(timeout);
+        return restTemplate;
+    }
 
     String getPrediction(Resource File){
         System.out.println("\n\n\n\n\n Inside get prediction \n\n\n\n");
@@ -270,7 +350,7 @@ public class PredictActivity extends AppCompatActivity {
 
             ResponseEntity<String> response;
             response = restTemplate
-                    .postForEntity("http://3.14.82.136:5000/svm/runalgo", requestEntity, String.class);
+                    .postForEntity("http://3.19.14.50:5000/svm/runalgo", requestEntity, String.class);
             HttpStatus statusCode = response.getStatusCode();
             if(statusCode!=HttpStatus.OK)
                 return "Network Error or Could not predict";
