@@ -37,10 +37,13 @@ import com.facebook.stetho.Stetho;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.core.io.ClassPathResource;
+
+
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -52,6 +55,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -60,12 +64,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.NameValuePair;
+import cz.msebera.android.httpclient.client.ClientProtocolException;
+import cz.msebera.android.httpclient.client.HttpClient;
+import cz.msebera.android.httpclient.client.entity.UrlEncodedFormEntity;
+import cz.msebera.android.httpclient.client.methods.HttpPost;
+import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
+import cz.msebera.android.httpclient.message.BasicNameValuePair;
+import cz.msebera.android.httpclient.util.EntityUtils;
 
 
 public class PredictActivity extends AppCompatActivity {
@@ -200,6 +215,37 @@ public class PredictActivity extends AppCompatActivity {
             bt_predict.setEnabled(true);
 
         }
+    }
+
+//    protected String sendFileToServer(Resource file){
+//        MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
+//        File file;
+//        multipartEntity.addBinaryBody("someName", file, ContentType.create("image/jpeg"), file.getName());
+////Json string attaching
+//        String json;
+//        multipartEntity.addPart("someName", new StringBody(json, ContentType.TEXT_PLAIN));
+//    }
+    protected String doInBackgroundPredict(Resource File) {
+
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpPost httppost = new HttpPost("http://3.14.82.136:5000/svm/runalgo");
+
+        try {
+            MultipartEntity reqEntity = new MultipartEntity();
+           // String id = params[0];
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("user_csv", File));
+            httppost.setHeader("key","user_csv");
+            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            HttpResponse response = httpclient.execute(httppost);
+            this.answer = EntityUtils.toString(response.getEntity());
+
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+        }
+        return this.answer;
     }
 
 
