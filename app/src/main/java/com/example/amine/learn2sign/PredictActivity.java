@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -101,6 +102,7 @@ import cz.msebera.android.httpclient.util.EntityUtils;
 
 public class PredictActivity extends AppCompatActivity {
 
+
     @BindView(R.id.rg_practice_learn)
     RadioGroup rg_practice_learn;
 
@@ -128,6 +130,8 @@ public class PredictActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_predict);
+
+
         //initialize variables
         ButterKnife.bind(this);
         rb_predict.setChecked(true);
@@ -177,6 +181,7 @@ public class PredictActivity extends AppCompatActivity {
 
     @OnClick(R.id.bt_select_data)
     public void uploadCSV(){
+
         Toast.makeText(getApplicationContext(),"Upload data",Toast.LENGTH_SHORT).show();
 
         Intent selectFile =  new Intent().setType("*/*").setAction(Intent.ACTION_GET_CONTENT);
@@ -205,19 +210,21 @@ public class PredictActivity extends AppCompatActivity {
             }
 
             Resource resource = new FileSystemResource(signFile);
-            String prediction = predictAlready(resource);
-            //String prediction = getPrediction(resource);
-            //String prediction = sendFileToServer(signFile);
-            //String prediction = "predicted word";
-            //store file and upload
-            Toast.makeText(getApplicationContext(),"prediction - "+prediction,Toast.LENGTH_SHORT).show();
-//            if(prediction=="about" || prediction=="father"){
-//                this.answer = prediction;
-//            }
+            if(requestCode!=RESULT_CANCELED){
+                //String prediction = predictAlready(resource);
+                String predict = "not set";
+                try{
+                     predict = new RetrieveFeedTask().execute(resource).get();
 
-            this.answer = prediction;
+                }
+                catch(Exception e){
+                    Log.d("radhika async  ",e.getMessage());
+                }
 
-
+                //String prediction1  = prediction.doInBackground(resource);
+                Toast.makeText(getApplicationContext(),"prediction - "+predict,Toast.LENGTH_SHORT).show();
+                this.answer = predict;
+            }
 
 
         }
@@ -234,54 +241,11 @@ public class PredictActivity extends AppCompatActivity {
 
         }
     }
-//
-//    protected String sendFileToServer(File file){
-//
-//
-//        HttpClient httpclient = new DefaultHttpClient();
-//        HttpPost httppost = new HttpPost("http://3.14.82.136:5000/svm/runalgo");
-//
-//        MultipartEntity reqEntity = new MultipartEntity();
-//        //reqEntity.addPart("key", file);
-//        reqEntity.addPart("user_csv", new FileBody(file));
-//
-//
-//        httppost.setEntity(reqEntity);
-//        httppost.setEntity(new UrlEncodedFormEntity(reqEntity, ));
-//
-//       // HttpResponse response = httpclient.execute(httppost);
-//       HttpResponse response = httpclient.execute(httppost);
-//        this.answer = response.getEntity().toString();
-//
-//        return this.answer;
-//
-//    }
-//    protected String doInBackgroundPredict(Resource File) {
-//
-//        HttpClient httpclient = new DefaultHttpClient();
-//        HttpPost httppost = new HttpPost("http://3.14.82.136:5000/svm/runalgo");
-//
-//        try {
-//            MultipartEntity reqEntity = new MultipartEntity();
-//           // String id = params[0];
-//            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-//            nameValuePairs.add(new BasicNameValuePair("user_csv", File));
-//            httppost.setHeader("key","user_csv");
-//            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-//            HttpResponse response = httpclient.execute(httppost);
-//            this.answer = EntityUtils.toString(response.getEntity());
-//
-//        } catch (ClientProtocolException e) {
-//            // TODO Auto-generated catch block
-//        } catch (IOException e) {
-//            // TODO Auto-generated catch block
-//        }
-//        return this.answer;
-//    }
+
 
     String predictAlready(Resource file){
         Log.d("radhika","INSIDE PREDICT ALREADY----------------------------");
-        try {
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -289,16 +253,16 @@ public class PredictActivity extends AppCompatActivity {
                     = new LinkedMultiValueMap<>();
             Log.d("radhika","radhika1 - adding file to request:"+file.getFilename() );
 
-            body.add("user_csv", file);
+            body.set("user_csv", file);
+            body.add("user_csv",file);
             HttpEntity<MultiValueMap<String, Object>> requestEntity
                     = new HttpEntity<>(body, headers);
             Log.d("radhika","radhika2 - file added to requestentity" );
             RestTemplate restTemplate = new RestTemplate();
-            restTemplate = setTimeout(restTemplate, 3000);
+            restTemplate = setTimeout(restTemplate, 10000);
             Log.d("radhika","radhika3 -sending request" );
             ResponseEntity<String> response;
-            response = restTemplate
-                    .postForEntity("http://3.19.14.50:5000/svm/runalgo", requestEntity, String.class);
+            response = restTemplate.postForEntity("http://3.19.14.50:5000/svm/runalgo", requestEntity, String.class);
             Log.d("radhika","radhika4 - got response" );
             HttpStatus statusCode = response.getStatusCode();
             if(statusCode!=HttpStatus.OK)
@@ -309,13 +273,8 @@ public class PredictActivity extends AppCompatActivity {
 
             Log.d("radhika","lalalala"+response.getBody());
             return response.getBody();
-        }
 
-        catch (Exception e){
-            Log.d("radhika","threw exception");
-            Log.d("radhika",e.getMessage());
-            return  e.getMessage();
-        }
+
     }
 
     private RestTemplate setTimeout(RestTemplate restTemplate, int timeout) {
@@ -330,9 +289,9 @@ public class PredictActivity extends AppCompatActivity {
     }
 
     String getPrediction(Resource File){
-        System.out.println("\n\n\n\n\n Inside get prediction \n\n\n\n");
+        //System.out.println("\n\n\n\n\n Inside get prediction \n\n\n\n");
         try {
-            System.out.println("\n\n\n\n\n Inside try get prediction \n\n\n\n");
+            //System.out.println("\n\n\n\n\n Inside try get prediction \n\n\n\n");
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -349,8 +308,8 @@ public class PredictActivity extends AppCompatActivity {
             RestTemplate restTemplate = new RestTemplate();
 
             ResponseEntity<String> response;
-            response = restTemplate
-                    .postForEntity("http://3.19.14.50:5000/svm/runalgo", requestEntity, String.class);
+           // PostData postData = new PostData();
+            response = restTemplate.postForEntity("http://3.19.14.50:5000/svm/runalgo", requestEntity, String.class);
             HttpStatus statusCode = response.getStatusCode();
             if(statusCode!=HttpStatus.OK)
                 return "Network Error or Could not predict";
